@@ -5,176 +5,86 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>HomeFREE VPN Premium</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.x.x/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.x.x/firebase-database-compat.js"></script>
     <style>
-        body {
-            background-color: #0b0b0b;
-            color: #ffffff;
-            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .header {
-            text-align: center;
-            margin-bottom: 25px;
-        }
-
-        h2 {
-            font-size: 22px;
-            margin-bottom: 10px;
-            letter-spacing: 1px;
-        }
-
-        .description {
-            color: #d4af37; /* Золотистый цвет текста */
-            font-size: 14px;
-            line-height: 1.4;
-            max-width: 300px;
-            margin: 0 auto;
-        }
-
-        .tariffs {
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            margin-bottom: 20px;
-        }
-
-        .tariff-item {
-            background-color: #1c1c1c;
-            border: 1px solid transparent;
-            border-radius: 12px;
-            padding: 18px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            cursor: pointer;
-        }
-
-        /* Стиль для выбранного тарифа (как на скрине) */
-        .tariff-item.selected {
-            border-color: #d4af37;
-        }
-
-        .tariff-info {
-            font-size: 16px;
-        }
-
-        .tariff-price {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .radio-btn {
-            width: 18px;
-            height: 18px;
-            border: 2px solid #555;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .selected .radio-btn {
-            border-color: #d4af37;
-        }
-
-        .selected .radio-btn::after {
-            content: '';
-            width: 10px;
-            height: 10px;
-            background-color: #d4af37;
-            border-radius: 50%;
-        }
-
-        .manage-sub {
-            width: 100%;
-            background-color: #1c1c1c;
-            color: #888;
-            border: none;
-            padding: 12px;
-            border-radius: 10px;
-            font-size: 14px;
-            margin-bottom: 20px;
-        }
-
-        .footer-text {
-            font-size: 10px;
-            color: #555;
-            text-align: left;
-            margin-bottom: 20px;
-        }
-
-        .footer-text a {
-            color: #888;
-            text-decoration: underline;
-        }
-
-        .continue-btn {
-            width: 100%;
-            background-color: #ffffff;
-            color: #000000;
-            border: none;
-            padding: 16px;
-            border-radius: 25px;
-            font-size: 16px;
-            font-weight: bold;
-        }
+        body { background-color: #0b0b0b; color: #ffffff; font-family: -apple-system, sans-serif; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        .header { text-align: center; margin-bottom: 25px; }
+        h2 { font-size: 22px; margin-bottom: 10px; }
+        .description { color: #d4af37; font-size: 14px; line-height: 1.4; text-align: center; margin-bottom: 20px; }
+        .tariffs { width: 100%; display: flex; flex-direction: column; gap: 12px; }
+        .tariff-item { background-color: #1c1c1c; border: 1px solid transparent; border-radius: 12px; padding: 18px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+        .tariff-item.selected { border-color: #d4af37; }
+        .radio-btn { width: 18px; height: 18px; border: 2px solid #555; border-radius: 50%; position: relative; }
+        .selected .radio-btn { border-color: #d4af37; }
+        .selected .radio-btn::after { content: ''; width: 10px; height: 10px; background: #d4af37; border-radius: 50%; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+        .manage-sub { width: 100%; background: #1c1c1c; color: #888; border: none; padding: 12px; border-radius: 10px; margin: 15px 0; }
+        .footer-text { font-size: 10px; color: #555; margin-bottom: 20px; }
+        .continue-btn { width: 100%; background: #fff; color: #000; border: none; padding: 16px; border-radius: 25px; font-weight: bold; font-size: 16px; cursor: pointer; }
     </style>
 </head>
 <body>
-
     <div class="header">
         <h2>PREMIUM + 🚀</h2>
         <p class="description">Подключая PREMIUM + вы используете VPN соединение с любым сервером на максимальной скорости. В приложении полностью отключена реклама</p>
     </div>
 
     <div class="tariffs">
-        <div class="tariff-item selected" onclick="select(this, '1 месяц', '199 ₽')">
-            <div class="tariff-info">1 месяц</div>
-            <div class="tariff-price">199 ₽ <div class="radio-btn"></div></div>
+        <div class="tariff-item selected" onclick="select(this, '1_month', '199 ₽')">
+            <span>1 месяц</span>
+            <div style="display:flex; align-items:center; gap:10px;">199 ₽ <div class="radio-btn"></div></div>
         </div>
-        <div class="tariff-item" onclick="select(this, '3 месяца', '449 ₽')">
-            <div class="tariff-info">3 месяца</div>
-            <div class="tariff-price">449 ₽ <div class="radio-btn"></div></div>
+        <div class="tariff-item" onclick="select(this, '3_months', '449 ₽')">
+            <span>3 месяца</span>
+            <div style="display:flex; align-items:center; gap:10px;">449 ₽ <div class="radio-btn"></div></div>
         </div>
-        <div class="tariff-item" onclick="select(this, '6 месяцев', '835 ₽')">
-            <div class="tariff-info">6 месяцев</div>
-            <div class="tariff-price">835 ₽ <div class="radio-btn"></div></div>
+        <div class="tariff-item" onclick="select(this, '6_months', '835 ₽')">
+            <span>6 месяцев</span>
+            <div style="display:flex; align-items:center; gap:10px;">835 ₽ <div class="radio-btn"></div></div>
         </div>
-        <div class="tariff-item" onclick="select(this, '12 месяцев', '1432 ₽')">
-            <div class="tariff-info">12 месяцев</div>
-            <div class="tariff-price">1432 ₽ <div class="radio-btn"></div></div>
+        <div class="tariff-item" onclick="select(this, '12_months', '1432 ₽')">
+            <span>12 месяцев</span>
+            <div style="display:flex; align-items:center; gap:10px;">1432 ₽ <div class="radio-btn"></div></div>
         </div>
     </div>
 
     <button class="manage-sub">Управление подпиской</button>
 
     <div class="footer-text">
-        Нажимая «Продолжить», вы соглашаетесь с <a href="#">политикой обработки персональных данных</a>, <a href="#">договором-офертой</a> и <a href="#">условиями автопродления подписки</a>. Подписка продлевается автоматически, отключить её можно в разделе «Управление подпиской».
+        Нажимая «Продолжить», вы соглашаетесь с условиями. Подписка продлевается автоматически.
     </div>
 
-    <button class="continue-btn" onclick="sendToBot()">Продолжить</button>
+    <button class="continue-btn" id="pay-btn">Продолжить</button>
 
     <script>
+        // Инициализация
         let tg = window.Telegram.WebApp;
         tg.expand();
-        let currentChoice = "1 месяц за 199 ₽";
 
-        function select(el, name, price) {
+        const firebaseConfig = {
+            databaseURL: "https://homefree-vpn-default-rtdb.firebaseio.com/"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        let selectedPlan = "1_month";
+
+        function select(el, plan, price) {
             document.querySelectorAll('.tariff-item').forEach(i => i.classList.remove('selected'));
             el.classList.add('selected');
-            currentChoice = name + " за " + price;
+            selectedPlan = plan;
         }
 
-        function sendToBot() {
-            tg.sendData("Выбран тариф: " + currentChoice);
-        }
-    </script>
-</body>
-</html>
+        document.getElementById('pay-btn').onclick = function() {
+            const userId = tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : "test_user";
+            
+            // Записываем намерение об оплате в Firebase
+            database.ref('payments/' + userId).set({
+                plan: selectedPlan,
+                status: "pending", // статус изменится на success после оплаты
+                is_activated: false,
+                timestamp: new Date().toISOString()
+            }).then(() => {
+                // Здесь обычно идет вызов платежной системы, 
+                // но пока просто уведомляем бота
+                tg.sendData("Выбран тариф: " + selectedPlan);
