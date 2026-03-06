@@ -10,81 +10,148 @@
     <style>
         body { background-color: #0b0b0b; color: #ffffff; font-family: -apple-system, sans-serif; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
         .header { text-align: center; margin-bottom: 25px; }
-        h2 { font-size: 22px; margin-bottom: 10px; }
+        h2 { font-size: 22px; margin-bottom: 10px; color: #fff; }
         .description { color: #d4af37; font-size: 14px; line-height: 1.4; text-align: center; margin-bottom: 20px; }
+        
+        /* Стили тарифов */
         .tariffs { width: 100%; display: flex; flex-direction: column; gap: 12px; }
-        .tariff-item { background-color: #1c1c1c; border: 1px solid transparent; border-radius: 12px; padding: 18px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
-        .tariff-item.selected { border-color: #d4af37; }
-        .radio-btn { width: 18px; height: 18px; border: 2px solid #555; border-radius: 50%; position: relative; }
+        .tariff-item { background-color: #1c1c1c; border: 2px solid transparent; border-radius: 12px; padding: 18px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: 0.2s; }
+        .tariff-item.selected { border-color: #d4af37; background-color: #252525; }
+        
+        .radio-btn { width: 20px; height: 20px; border: 2px solid #555; border-radius: 50%; position: relative; }
         .selected .radio-btn { border-color: #d4af37; }
         .selected .radio-btn::after { content: ''; width: 10px; height: 10px; background: #d4af37; border-radius: 50%; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
-        .manage-sub { width: 100%; background: #1c1c1c; color: #888; border: none; padding: 12px; border-radius: 10px; margin: 15px 0; }
-        .footer-text { font-size: 10px; color: #555; margin-bottom: 20px; }
-        .continue-btn { width: 100%; background: #fff; color: #000; border: none; padding: 16px; border-radius: 25px; font-weight: bold; font-size: 16px; cursor: pointer; }
+
+        /* Кнопки */
+        .manage-sub { width: 100%; background: #1c1c1c; color: #888; border: none; padding: 12px; border-radius: 10px; margin: 15px 0; font-size: 14px; cursor: pointer; }
+        .continue-btn { width: 100%; background: #fff; color: #000; border: none; padding: 16px; border-radius: 25px; font-weight: bold; font-size: 16px; cursor: pointer; margin-top: 10px; }
+        
+        /* Экран управления подпиской */
+        #manage-screen { display: none; width: 100%; }
+        .card-info { background: #1c1c1c; padding: 15px; border-radius: 12px; margin-top: 10px; border-left: 4px solid #d4af37; }
+        .unlink-btn { color: #ff4444; background: none; border: 1px solid #ff4444; padding: 8px 15px; border-radius: 8px; margin-top: 10px; cursor: pointer; width: 100%; }
+        .back-btn { color: #888; background: none; border: none; margin-top: 20px; cursor: pointer; text-decoration: underline; }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h2>PREMIUM + 🚀</h2>
-        <p class="description">Подключая PREMIUM + вы используете VPN соединение с любым сервером на максимальной скорости. В приложении полностью отключена реклама</p>
+
+    <div id="main-screen">
+        <div class="header">
+            <h2>PREMIUM + 🚀</h2>
+            <p class="description">Подключая PREMIUM + вы используете VPN соединение с любым сервером на максимальной скорости.</p>
+        </div>
+
+        <div class="tariffs">
+            <div class="tariff-item selected" onclick="selectPlan(this, '1_month', '199')">
+                <span>1 месяц</span>
+                <div style="display:flex; align-items:center; gap:10px;">199 ₽ <div class="radio-btn"></div></div>
+            </div>
+            <div class="tariff-item" onclick="selectPlan(this, '3_months', '449')">
+                <span>3 месяца</span>
+                <div style="display:flex; align-items:center; gap:10px;">449 ₽ <div class="radio-btn"></div></div>
+            </div>
+            <div class="tariff-item" onclick="selectPlan(this, '12_months', '1432')">
+                <span>12 месяцев</span>
+                <div style="display:flex; align-items:center; gap:10px;">1432 ₽ <div class="radio-btn"></div></div>
+            </div>
+        </div>
+
+        <button class="manage-sub" onclick="toggleScreen('manage')">⚙️ Управление подпиской</button>
+        <button class="continue-btn" id="pay-btn">Продолжить</button>
     </div>
 
-    <div class="tariffs">
-        <div class="tariff-item selected" onclick="select(this, '1_month', '199 ₽')">
-            <span>1 месяц</span>
-            <div style="display:flex; align-items:center; gap:10px;">199 ₽ <div class="radio-btn"></div></div>
+    <div id="manage-screen">
+        <div class="header">
+            <h2>Ваша подписка</h2>
         </div>
-        <div class="tariff-item" onclick="select(this, '3_months', '449 ₽')">
-            <span>3 месяца</span>
-            <div style="display:flex; align-items:center; gap:10px;">449 ₽ <div class="radio-btn"></div></div>
+        
+        <div id="subscription-status" style="text-align: center; margin-bottom: 20px;">
+            Загрузка данных...
         </div>
-        <div class="tariff-item" onclick="select(this, '6_months', '835 ₽')">
-            <span>6 месяцев</span>
-            <div style="display:flex; align-items:center; gap:10px;">835 ₽ <div class="radio-btn"></div></div>
+
+        <div id="card-section" style="display: none;">
+            <p style="font-size: 12px; color: #888;">ПРИВЯЗАННАЯ КАРТА:</p>
+            <div class="card-info">
+                <span id="card-number">•••• •••• •••• 4242</span>
+                <button class="unlink-btn" onclick="unlinkCard()">Отвязать карту</button>
+            </div>
         </div>
-        <div class="tariff-item" onclick="select(this, '12_months', '1432 ₽')">
-            <span>12 месяцев</span>
-            <div style="display:flex; align-items:center; gap:10px;">1432 ₽ <div class="radio-btn"></div></div>
-        </div>
+
+        <button class="back-btn" onclick="toggleScreen('main')">← Вернуться к тарифам</button>
     </div>
-
-    <button class="manage-sub">Управление подпиской</button>
-
-    <div class="footer-text">
-        Нажимая «Продолжить», вы соглашаетесь с условиями. Подписка продлевается автоматически.
-    </div>
-
-    <button class="continue-btn" id="pay-btn">Продолжить</button>
 
     <script>
-        // Инициализация
         let tg = window.Telegram.WebApp;
         tg.expand();
 
-        const firebaseConfig = {
-            databaseURL: "https://homefree-vpn-default-rtdb.firebaseio.com/"
-        };
+        // Конфиг Firebase (Ваш)
+        const firebaseConfig = { databaseURL: "https://homefree-vpn-default-rtdb.firebaseio.com/" };
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        let selectedPlan = "1_month";
+        const userId = tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : "test_user";
+        let currentPlan = "1_month";
 
-        function select(el, plan, price) {
-            document.querySelectorAll('.tariff-item').forEach(i => i.classList.remove('selected'));
+        // Функция переключения планов
+        function selectPlan(el, planId, price) {
+            document.querySelectorAll('.tariff-item').forEach(item => item.classList.remove('selected'));
             el.classList.add('selected');
-            selectedPlan = plan;
+            currentPlan = planId;
+            tg.HapticFeedback.selectionChanged();
         }
 
-        document.getElementById('pay-btn').onclick = function() {
-            const userId = tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : "test_user";
+        // Переключение экранов
+        function toggleScreen(screen) {
+            if (screen === 'manage') {
+                document.getElementById('main-screen').style.display = 'none';
+                document.getElementById('manage-screen').style.display = 'block';
+                loadUserData();
+            } else {
+                document.getElementById('main-screen').style.display = 'block';
+                document.getElementById('manage-screen').style.display = 'none';
+            }
+        }
+
+        // Загрузка данных пользователя из Firebase
+        function loadUserData() {
+            const statusDiv = document.getElementById('subscription-status');
+            const cardSection = document.getElementById('card-section');
             
-            // Записываем намерение об оплате в Firebase
-            database.ref('payments/' + userId).set({
-                plan: selectedPlan,
-                status: "pending", // статус изменится на success после оплаты
-                is_activated: false,
-                timestamp: new Date().toISOString()
-            }).then(() => {
-                // Здесь обычно идет вызов платежной системы, 
-                // но пока просто уведомляем бота
-                tg.sendData("Выбран тариф: " + selectedPlan);
+            database.ref('users/' + userId).once('value').then((snapshot) => {
+                const data = snapshot.val();
+                if (data && data.premium_active) {
+                    statusDiv.innerHTML = "✅ Статус: <b style='color:#d4af37'>PREMIUM+ Активен</b><br><small>До: " + (data.expire_date || "не ограничено") + "</small>";
+                    if (data.card_linked) {
+                        cardSection.style.display = 'block';
+                        document.getElementById('card-number').innerText = "•••• " + data.card_last4;
+                    }
+                } else {
+                    statusDiv.innerHTML = "❌ Подписка не найдена";
+                    cardSection.style.display = 'none';
+                }
+            });
+        }
+
+        // Отвязка карты
+        function unlinkCard() {
+            if(confirm("Вы уверены, что хотите отвязать карту? Автопродление будет отключено.")) {
+                database.ref('users/' + userId).update({
+                    card_linked: false,
+                    recurrent_enabled: false
+                }).then(() => {
+                    alert("Карта успешно отвязана");
+                    loadUserData();
+                });
+            }
+        }
+
+        // Кнопка оплаты
+        document.getElementById('pay-btn').onclick = function() {
+            tg.MainButton.setText("ОПЛАТИТЬ ТАРИФ");
+            tg.MainButton.show();
+            // Отправляем данные боту
+            tg.sendData(JSON.stringify({action: "payment", plan: currentPlan}));
+        };
+    </script>
+</body>
+</html>
