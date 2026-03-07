@@ -6,31 +6,44 @@
     <title>HomeFREE VPN Premium</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { background-color: #0b0b0b; color: #ffffff; font-family: -apple-system, sans-serif; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; box-sizing: border-box; }
-        
-        /* Стили для разделов (экранов) */
+        * { box-sizing: border-box; }
+        body { background-color: #0b0b0b; color: #ffffff; font-family: -apple-system, sans-serif; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+
         .page { display: none; width: 100%; flex-direction: column; align-items: center; }
         .page.active { display: flex; }
 
         .header { text-align: center; margin-bottom: 25px; }
         h2 { font-size: 22px; margin-bottom: 10px; font-weight: 500; }
         .description { color: #e7d79b; font-size: 14px; line-height: 1.4; text-align: center; margin-bottom: 20px; }
-        
+
         /* Тарифы */
         .tariffs { width: 100%; display: flex; flex-direction: column; gap: 10px; }
         .tariff-item { background-color: #1c1c1c; border: 1px solid #333; border-radius: 14px; padding: 20px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: 0.2s; }
         .tariff-item.selected { border-color: #e7d79b; }
-        
         .tariff-name { font-size: 18px; font-weight: 400; }
         .tariff-price-row { display: flex; align-items: center; gap: 12px; font-size: 18px; }
-
         .radio-btn { width: 22px; height: 22px; border: 2px solid #555; border-radius: 50%; position: relative; flex-shrink: 0; }
         .selected .radio-btn { border-color: #e7d79b; }
         .selected .radio-btn::after { content: ''; width: 10px; height: 10px; background: #e7d79b; border-radius: 50%; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
 
+        /* ID экран */
+        .id-screen { width: 100%; }
+        .id-instruction { background: #1c1c1c; border-radius: 14px; padding: 16px; margin-bottom: 20px; font-size: 13px; color: #ccc; line-height: 1.6; }
+        .id-instruction b { color: #e7d79b; }
+        .id-input-wrap { position: relative; width: 100%; margin-bottom: 10px; }
+        .id-input { width: 100%; background: #1c1c1c; border: 1px solid #333; border-radius: 12px; padding: 16px 50px 16px 16px; color: #fff; font-size: 16px; font-family: monospace; outline: none; letter-spacing: 1px; }
+        .id-input:focus { border-color: #e7d79b; }
+        .id-input.valid { border-color: #3DDC84; }
+        .id-input.invalid { border-color: #ff4444; }
+        .id-clear { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); color: #555; font-size: 18px; cursor: pointer; display: none; }
+        .id-hint { font-size: 12px; color: #888; margin-bottom: 20px; min-height: 18px; }
+        .id-hint.error { color: #ff4444; }
+        .id-hint.success { color: #3DDC84; }
+
         /* Кнопки */
         .manage-sub { width: 100%; background: #1c1c1c; color: #888; border: none; padding: 14px; border-radius: 12px; margin: 15px 0; font-size: 15px; cursor: pointer; }
         .continue-btn { width: 100%; background: #fff; color: #000; border: none; padding: 18px; border-radius: 30px; font-weight: bold; font-size: 18px; cursor: pointer; margin-top: 20px; }
+        .continue-btn:disabled { background: #444; color: #777; cursor: not-allowed; }
         .cancel-btn { width: 100%; background: transparent; color: #ff4444; border: 1px solid #ff4444; padding: 16px; border-radius: 30px; font-weight: bold; font-size: 16px; cursor: pointer; margin-top: 40px; }
         .back-link { color: #e7d79b; margin-top: 20px; text-decoration: none; font-size: 14px; cursor: pointer; }
 
@@ -39,32 +52,39 @@
         .footer-text a { color: #e7d79b; text-decoration: underline; }
 
         /* Карта */
-        .card-info { background: #1c1c1c; width: 100%; padding: 20px; border-radius: 14px; margin-top: 10px; box-sizing: border-box; border: 1px solid #333; }
+        .card-info { background: #1c1c1c; width: 100%; padding: 20px; border-radius: 14px; margin-top: 10px; border: 1px solid #333; }
         .card-details { color: #e7d79b; font-family: monospace; font-size: 16px; margin-top: 10px; }
+
+        /* ID badge на экране тарифов */
+        .id-badge { background: #1c1c1c; border: 1px solid #333; border-radius: 10px; padding: 10px 14px; margin-bottom: 16px; width: 100%; display: flex; justify-content: space-between; align-items: center; }
+        .id-badge-label { font-size: 11px; color: #888; }
+        .id-badge-value { font-family: monospace; font-size: 13px; color: #3DDC84; }
+        .id-badge-change { font-size: 11px; color: #e7d79b; cursor: pointer; }
     </style>
 </head>
 <body>
 
+    <!-- ШАГ 1: Выбор тарифа -->
     <div id="selection-page" class="page active">
         <div class="header">
             <h2>PREMIUM + 🚀</h2>
-            <p class="description">Подключая PREMIUM + вы используете VPN соединение с любым сервером на максимальной скорости. В приложении полностью отключена реклама</p>
+            <p class="description">Безлимитная скорость, все серверы, без рекламы</p>
         </div>
 
         <div class="tariffs">
-            <div class="tariff-item selected" onclick="selectPlan(this, '1_month', 198)">
+            <div class="tariff-item selected" onclick="selectPlan(this, '1_month', 198, '1 месяц')">
                 <span class="tariff-name">1 месяц</span>
                 <div class="tariff-price-row">198 ₽ <div class="radio-btn"></div></div>
             </div>
-            <div class="tariff-item" onclick="selectPlan(this, '3_months', 445)">
+            <div class="tariff-item" onclick="selectPlan(this, '3_months', 445, '3 месяца')">
                 <span class="tariff-name">3 месяца</span>
                 <div class="tariff-price-row">445 ₽ <div class="radio-btn"></div></div>
             </div>
-            <div class="tariff-item" onclick="selectPlan(this, '6_months', 829)">
+            <div class="tariff-item" onclick="selectPlan(this, '6_months', 829, '6 месяцев')">
                 <span class="tariff-name">6 месяцев</span>
                 <div class="tariff-price-row">829 ₽ <div class="radio-btn"></div></div>
             </div>
-            <div class="tariff-item" onclick="selectPlan(this, '12_months', 1429)">
+            <div class="tariff-item" onclick="selectPlan(this, '12_months', 1429, '12 месяцев')">
                 <span class="tariff-name">12 месяцев</span>
                 <div class="tariff-price-row">1429 ₽ <div class="radio-btn"></div></div>
             </div>
@@ -76,69 +96,168 @@
             <div style="display: flex; gap: 10px;">
                 <div class="radio-btn" style="width: 14px; height: 14px; border-color: #e7d79b; flex-shrink: 0; background: #e7d79b; box-shadow: inset 0 0 0 3px #1c1c1c; margin-top: 2px;"></div>
                 <span>
-                    Нажимая «Продолжить», вы соглашаетесь с 
-                    <a href="https://sites.google.com/view/homefreevpn-usloviya-ispolzov/%D0%B3%D0%BB%D0%B0%D0%B2%D0%BD%D0%B0%D1%8F-%D1%81%D1%82%D1%80%D0%B0%D0%BD%D0%B8%D1%86%D0%B0" target="_blank">условиями использования</a>, 
-                    <a href="https://sites.google.com/view/homefreevpn-privacy-policy/%D0%B3%D0%BB%D0%B0%D0%B2%D0%BD%D0%B0%D1%8F-%D1%81%D1%82%D1%80%D0%B0%D0%BD%D0%B8%D1%86%D0%B0" target="_blank">политикой конфиденциальности</a> 
+                    Нажимая «Продолжить», вы соглашаетесь с
+                    <a href="https://sites.google.com/view/homefreevpn-usloviya-ispolzov/%D0%B3%D0%BB%D0%B0%D0%B2%D0%BD%D0%B0%D1%8F-%D1%81%D1%82%D1%80%D0%B0%D0%BD%D0%B8%D1%86%D0%B0" target="_blank">условиями использования</a>,
+                    <a href="https://sites.google.com/view/homefreevpn-privacy-policy/%D0%B3%D0%BB%D0%B0%D0%B2%D0%BD%D0%B0%D1%8F-%D1%81%D1%82%D1%80%D0%B0%D0%BD%D0%B8%D1%86%D0%B0" target="_blank">политикой конфиденциальности</a>
                     и <a href="https://sites.google.com/view/homefree-vpn-podpiska/%D0%B3%D0%BB%D0%B0%D0%B2%D0%BD%D0%B0%D1%8F-%D1%81%D1%82%D1%80%D0%B0%D0%BD%D0%B8%D1%86%D0%B0" target="_blank">условиями платной подписки</a>.
                 </span>
             </div>
         </div>
 
-        <button class="continue-btn" onclick="sendToBot()">Продолжить</button>
+        <button class="continue-btn" onclick="goToIdPage()">Продолжить</button>
     </div>
 
+    <!-- ШАГ 2: Ввод ANDROID ID -->
+    <div id="id-page" class="page">
+        <div class="header">
+            <h2>Введите ваш ID</h2>
+            <p class="description">Нужен для активации подписки на вашем устройстве</p>
+        </div>
+
+        <!-- Выбранный тариф -->
+        <div class="id-badge" style="margin-bottom: 20px;">
+            <div>
+                <div class="id-badge-label">Выбранный тариф</div>
+                <div class="id-badge-value" id="selectedPlanBadge" style="color: #e7d79b;">1 месяц — 198 ₽</div>
+            </div>
+            <div class="id-badge-change" onclick="togglePage('selection-page')">Изменить</div>
+        </div>
+
+        <div class="id-screen">
+            <div class="id-instruction">
+                <b>Как найти ваш ID:</b><br>
+                1. Откройте приложение <b>HomeFree VPN</b><br>
+                2. Нажмите кнопку меню ☰ в левом верхнем углу<br>
+                3. Скопируйте ваш ID (значок копирования рядом с ID)<br>
+                4. Вставьте его в поле ниже
+            </div>
+
+            <div class="id-input-wrap">
+                <input
+                    id="androidIdInput"
+                    class="id-input"
+                    type="text"
+                    placeholder="Вставьте ваш ID"
+                    oninput="onIdInput()"
+                    autocomplete="off"
+                    autocorrect="off"
+                    spellcheck="false"
+                />
+                <span class="id-clear" id="idClear" onclick="clearId()">✕</span>
+            </div>
+            <div class="id-hint" id="idHint">ID можно скопировать из меню приложения</div>
+
+            <button class="continue-btn" id="idContinueBtn" onclick="sendToBot()" disabled>Оплатить</button>
+        </div>
+    </div>
+
+    <!-- ШАГ 3: Управление подпиской -->
     <div id="manage-page" class="page">
         <div class="header">
             <h2>Управление подпиской</h2>
         </div>
-        
         <p class="description" style="text-align: left; width: 100%;">Ваша подписка Premium+🚀 активна</p>
-        
         <div class="card-info">
             <div style="color: #888; font-size: 14px;">Данные о ваших картах:</div>
             <div class="card-details">•••• •••• •••• 4242</div>
             <div style="color: #555; font-size: 12px; margin-top: 5px;">Мир • Следующее списание: 198 ₽</div>
         </div>
-
-        <button class="cancel-btn" onclick="cancelSubscription()">Отказаться от подписки отвязать карту</button>
-        
+        <button class="cancel-btn" onclick="cancelSubscription()">Отказаться от подписки и отвязать карту</button>
         <div class="back-link" onclick="togglePage('selection-page')">← Вернуться к тарифам</div>
     </div>
 
     <script>
         let tg = window.Telegram.WebApp;
         tg.expand();
-        
-        let selectedPlan = { id: '1_month', price: 198, name: '1 месяц PREMIUM+' };
 
-        // Переключение между страницами
+        let selectedPlan = { id: '1_month', price: 198, name: '1 месяц PREMIUM+' };
+        let savedAndroidId = '';
+
+        // ========================================================
+        // ШАГ 1: Выбор тарифа
+        // ========================================================
+        function selectPlan(el, id, price, label) {
+            document.querySelectorAll('.tariff-item').forEach(i => i.classList.remove('selected'));
+            el.classList.add('selected');
+            selectedPlan = { id: id, price: price, name: label + ' PREMIUM+' };
+            tg.HapticFeedback.selectionChanged();
+        }
+
+        // Переход к вводу ID — показываем выбранный тариф в бейдже
+        function goToIdPage() {
+            document.getElementById('selectedPlanBadge').textContent =
+                selectedPlan.name.replace(' PREMIUM+', '') + ' — ' + selectedPlan.price + ' ₽';
+            togglePage('id-page');
+        }
+
+        // ========================================================
+        // ШАГ 2: Ввод ID
+        // ========================================================
+        function onIdInput() {
+            const input = document.getElementById('androidIdInput');
+            const hint  = document.getElementById('idHint');
+            const btn   = document.getElementById('idContinueBtn');
+            const clear = document.getElementById('idClear');
+            const val   = input.value.trim().toUpperCase();
+
+            clear.style.display = val.length > 0 ? 'block' : 'none';
+
+            if (val.length === 0) {
+                input.className = 'id-input';
+                hint.className  = 'id-hint';
+                hint.textContent = 'ID можно скопировать из меню приложения';
+                btn.disabled = true;
+            } else if (val.length < 8 || !val.match(/^[A-Z0-9]+$/)) {
+                input.className = 'id-input invalid';
+                hint.className  = 'id-hint error';
+                hint.textContent = 'ID должен содержать только буквы и цифры (от 8 символов)';
+                btn.disabled = true;
+            } else {
+                input.className = 'id-input valid';
+                hint.className  = 'id-hint success';
+                hint.textContent = '✓ ID выглядит корректно';
+                btn.disabled = false;
+            }
+        }
+
+        function clearId() {
+            document.getElementById('androidIdInput').value = '';
+            onIdInput();
+            document.getElementById('androidIdInput').focus();
+        }
+
+        // ========================================================
+        // ШАГ 3: Отправка боту → инвойс
+        // ========================================================
+        function sendToBot() {
+            const val = document.getElementById('androidIdInput').value.trim().toUpperCase();
+            if (val.length < 8) return;
+            savedAndroidId = val;
+            tg.HapticFeedback.impactOccurred('medium');
+            tg.sendData(JSON.stringify({
+                id:         selectedPlan.id,
+                price:      selectedPlan.price,
+                name:       selectedPlan.name,
+                android_id: savedAndroidId
+            }));
+        }
+
+        // ========================================================
+        // Управление подпиской
+        // ========================================================
+        function cancelSubscription() {
+            tg.showConfirm("Вы уверены, что хотите отвязать карту и отменить подписку?", (confirmed) => {
+                if (confirmed) {
+                    tg.sendData(JSON.stringify({ action: 'cancel_subscription', android_id: savedAndroidId }));
+                    tg.close();
+                }
+            });
+        }
+
         function togglePage(pageId) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.getElementById(pageId).classList.add('active');
             tg.HapticFeedback.impactOccurred('light');
-        }
-
-        // Выбор тарифа
-        function selectPlan(el, id, price) {
-            document.querySelectorAll('.tariff-item').forEach(i => i.classList.remove('selected'));
-            el.classList.add('selected');
-            selectedPlan = { id: id, price: price, name: el.querySelector('.tariff-name').innerText + ' PREMIUM+' };
-            tg.HapticFeedback.selectionChanged();
-        }
-
-        // Отправка данных боту для оплаты
-        function sendToBot() {
-            tg.sendData(JSON.stringify(selectedPlan));
-        }
-
-        // Логика отказа от подписки
-        function cancelSubscription() {
-            tg.showConfirm("Вы уверены, что хотите отвязать карту и отменить подписку?", (confirmed) => {
-                if (confirmed) {
-                    tg.sendData(JSON.stringify({action: 'cancel_subscription'}));
-                    tg.close();
-                }
-            });
         }
     </script>
 </body>
