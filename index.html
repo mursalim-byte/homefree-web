@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>HomeFREE VPN Premium</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
     <style>
         * { box-sizing: border-box; }
         body { background-color: #0b0b0b; color: #ffffff; font-family: -apple-system, sans-serif; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
@@ -16,7 +18,6 @@
         h2 { font-size: 22px; margin-bottom: 10px; font-weight: 500; }
         .description { color: #e7d79b; font-size: 14px; line-height: 1.4; text-align: center; margin-bottom: 20px; }
 
-        /* Тарифы */
         .tariffs { width: 100%; display: flex; flex-direction: column; gap: 10px; }
         .tariff-item { background-color: #1c1c1c; border: 1px solid #333; border-radius: 14px; padding: 20px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: 0.2s; }
         .tariff-item.selected { border-color: #e7d79b; }
@@ -24,9 +25,8 @@
         .tariff-price-row { display: flex; align-items: center; gap: 12px; font-size: 18px; }
         .radio-btn { width: 22px; height: 22px; border: 2px solid #555; border-radius: 50%; position: relative; flex-shrink: 0; }
         .selected .radio-btn { border-color: #e7d79b; }
-        .selected .radio-btn::after { content: ''; width: 10px; height: 10px; background: #e7d79b; border-radius: 50%; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+        .selected .radio-btn::after { content: ""; width: 10px; height: 10px; background: #e7d79b; border-radius: 50%; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
 
-        /* ID экран */
         .id-screen { width: 100%; }
         .id-instruction { background: #1c1c1c; border-radius: 14px; padding: 16px; margin-bottom: 20px; font-size: 13px; color: #ccc; line-height: 1.6; }
         .id-instruction b { color: #e7d79b; }
@@ -40,22 +40,18 @@
         .id-hint.error { color: #ff4444; }
         .id-hint.success { color: #3DDC84; }
 
-        /* Кнопки */
         .manage-sub { width: 100%; background: #1c1c1c; color: #888; border: none; padding: 14px; border-radius: 12px; margin: 15px 0; font-size: 15px; cursor: pointer; }
         .continue-btn { width: 100%; background: #fff; color: #000; border: none; padding: 18px; border-radius: 30px; font-weight: bold; font-size: 18px; cursor: pointer; margin-top: 20px; }
         .continue-btn:disabled { background: #444; color: #777; cursor: not-allowed; }
         .cancel-btn { width: 100%; background: transparent; color: #ff4444; border: 1px solid #ff4444; padding: 16px; border-radius: 30px; font-weight: bold; font-size: 16px; cursor: pointer; margin-top: 40px; }
         .back-link { color: #e7d79b; margin-top: 20px; text-decoration: none; font-size: 14px; cursor: pointer; }
 
-        /* Футер */
         .footer-text { font-size: 11px; color: #888; text-align: left; margin-top: 15px; line-height: 1.5; }
         .footer-text a { color: #e7d79b; text-decoration: underline; }
 
-        /* Карта */
         .card-info { background: #1c1c1c; width: 100%; padding: 20px; border-radius: 14px; margin-top: 10px; border: 1px solid #333; }
         .card-details { color: #e7d79b; font-family: monospace; font-size: 16px; margin-top: 10px; }
 
-        /* ID badge на экране тарифов */
         .id-badge { background: #1c1c1c; border: 1px solid #333; border-radius: 10px; padding: 10px 14px; margin-bottom: 16px; width: 100%; display: flex; justify-content: space-between; align-items: center; }
         .id-badge-label { font-size: 11px; color: #888; }
         .id-badge-value { font-family: monospace; font-size: 13px; color: #3DDC84; }
@@ -64,7 +60,6 @@
 </head>
 <body>
 
-    <!-- ШАГ 1: Выбор тарифа -->
     <div id="selection-page" class="page active">
         <div class="header">
             <h2>PREMIUM + 🚀</h2>
@@ -107,14 +102,12 @@
         <button class="continue-btn" onclick="goToIdPage()">Продолжить</button>
     </div>
 
-    <!-- ШАГ 2: Ввод ANDROID ID -->
     <div id="id-page" class="page">
         <div class="header">
             <h2>Введите ваш ID</h2>
             <p class="description">Нужен для активации подписки на вашем устройстве</p>
         </div>
 
-        <!-- Выбранный тариф -->
         <div class="id-badge" style="margin-bottom: 20px;">
             <div>
                 <div class="id-badge-label">Выбранный тариф</div>
@@ -151,7 +144,6 @@
         </div>
     </div>
 
-    <!-- ШАГ 3: Управление подпиской -->
     <div id="manage-page" class="page">
         <div class="header">
             <h2>Управление подпиской</h2>
@@ -167,15 +159,24 @@
     </div>
 
     <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyATxflAcMLsr1bDHw_mUpDmYQXvNmediuE",
+            authDomain: "homefree-vpn.firebaseapp.com",
+            databaseURL: "https://homefree-vpn-default-rtdb.firebaseio.com",
+            projectId: "homefree-vpn",
+            storageBucket: "homefree-vpn.appspot.com",
+            messagingSenderId: "1035218858726",
+            appId: "1:1035218858726:web:placeholder"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const fbDb = firebase.database();
+
         let tg = window.Telegram.WebApp;
         tg.expand();
 
         let selectedPlan = { id: '1_month', price: 198, name: '1 месяц PREMIUM+' };
         let savedAndroidId = '';
 
-        // ========================================================
-        // ШАГ 1: Выбор тарифа
-        // ========================================================
         function selectPlan(el, id, price, label) {
             document.querySelectorAll('.tariff-item').forEach(i => i.classList.remove('selected'));
             el.classList.add('selected');
@@ -183,16 +184,12 @@
             tg.HapticFeedback.selectionChanged();
         }
 
-        // Переход к вводу ID — показываем выбранный тариф в бейдже
         function goToIdPage() {
             document.getElementById('selectedPlanBadge').textContent =
                 selectedPlan.name.replace(' PREMIUM+', '') + ' — ' + selectedPlan.price + ' ₽';
             togglePage('id-page');
         }
 
-        // ========================================================
-        // ШАГ 2: Ввод ID
-        // ========================================================
         function onIdInput() {
             const input = document.getElementById('androidIdInput');
             const hint  = document.getElementById('idHint');
@@ -226,25 +223,58 @@
             document.getElementById('androidIdInput').focus();
         }
 
-        // ========================================================
-        // ШАГ 3: Отправка боту → инвойс
-        // ========================================================
-        function sendToBot() {
+        async function sendToBot() {
             const val = document.getElementById('androidIdInput').value.trim().toUpperCase();
             if (val.length < 8) return;
             savedAndroidId = val;
             tg.HapticFeedback.impactOccurred('medium');
-            tg.sendData(JSON.stringify({
+
+            const data = JSON.stringify({
                 id:         selectedPlan.id,
                 price:      selectedPlan.price,
                 name:       selectedPlan.name,
                 android_id: savedAndroidId
-            }));
+            });
+
+            // Пробуем sendData (работает с reply-кнопкой)
+            try {
+                tg.sendData(data);
+                return;
+            } catch(e) {
+                // sendData недоступен — открыто через inline кнопку
+            }
+
+            // Fallback: пишем в Firebase, бот прочитает и отправит инвойс
+            const userId = tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : null;
+            if (!userId) {
+                tg.showAlert('Ошибка: не удалось определить пользователя. Используйте кнопку оплаты внизу чата.');
+                return;
+            }
+
+            try {
+                const btn = document.getElementById('idContinueBtn');
+                btn.disabled = true;
+                btn.textContent = 'Отправляем...';
+
+                await fbDb.ref('payment_requests/' + userId).set({
+                    plan_id:    selectedPlan.id,
+                    price:      selectedPlan.price,
+                    name:       selectedPlan.name,
+                    android_id: savedAndroidId,
+                    status:     'pending',
+                    created_at: Date.now()
+                });
+
+                tg.showAlert('✅ Готово! Бот пришлёт счёт на оплату через несколько секунд.');
+                tg.close();
+            } catch(err) {
+                tg.showAlert('Ошибка отправки. Попробуйте ещё раз.');
+                const btn = document.getElementById('idContinueBtn');
+                btn.disabled = false;
+                btn.textContent = 'Оплатить';
+            }
         }
 
-        // ========================================================
-        // Управление подпиской
-        // ========================================================
         function cancelSubscription() {
             tg.showConfirm("Вы уверены, что хотите отвязать карту и отменить подписку?", (confirmed) => {
                 if (confirmed) {
