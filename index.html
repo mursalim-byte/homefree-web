@@ -54,6 +54,7 @@
         .id-badge-change { font-size: 11px; color: #e7d79b; cursor: pointer; }
 
         .sub-status-box { background: #1c1c1c; border-radius: 14px; padding: 24px; width: 100%; text-align: center; font-size: 15px; line-height: 1.8; }
+        .cancel-btn { width: 100%; background: transparent; color: #ff4444; border: 1px solid #ff4444; padding: 16px; border-radius: 30px; font-weight: bold; font-size: 16px; cursor: pointer; margin-top: 16px; }
     </style>
 </head>
 <body>
@@ -173,6 +174,7 @@
         </div>
 
         <div id="subStatusBox" class="sub-status-box" style="display:none; margin-top:20px"></div>
+        <button id="cancelSubBtn" class="cancel-btn" style="display:none" onclick="cancelSubscription()">Отменить подписку</button>
         <div class="back-link" onclick="togglePage('selection-page')">← Вернуться к тарифам</div>
     </div>
 
@@ -348,7 +350,9 @@
         function checkSubscription() {
             const androidId = document.getElementById('manageIdInput').value.trim().toUpperCase();
             const box = document.getElementById('subStatusBox');
+            const cancelBtn = document.getElementById('cancelSubBtn');
             box.style.display = 'block';
+            cancelBtn.style.display = 'none';
             box.innerHTML = 'Загрузка...';
 
             fbDb.ref('users/' + androidId + '/premium_until').once('value').then(snap => {
@@ -356,11 +360,28 @@
                 if (val && val > Date.now()) {
                     const date = new Date(val).toLocaleDateString('ru-RU', {day: '2-digit', month: '2-digit', year: 'numeric'});
                     box.innerHTML = '✅ Подписка PREMIUM+ активна<br><br>Действует до:<br><b style="color:#3DDC84; font-size:20px">' + date + '</b>';
+                    cancelBtn.style.display = 'block';
                 } else {
                     box.innerHTML = '❌ Активная подписка не найдена.<br><br>Нажмите «Назад» и оформите подписку.';
+                    cancelBtn.style.display = 'none';
                 }
             }).catch(() => {
                 box.innerHTML = '⚠️ Не удалось загрузить данные. Проверьте подключение.';
+            });
+        }
+
+        function cancelSubscription() {
+            const androidId = document.getElementById('manageIdInput').value.trim().toUpperCase();
+            tg.showConfirm('Вы уверены, что хотите отменить подписку PREMIUM+?\n\nДоступ будет прекращён немедленно.', (confirmed) => {
+                if (!confirmed) return;
+                fbDb.ref('users/' + androidId + '/premium_until').set(0).then(() => {
+                    const box = document.getElementById('subStatusBox');
+                    box.innerHTML = '❌ Подписка отменена.';
+                    document.getElementById('cancelSubBtn').style.display = 'none';
+                    tg.showAlert('Подписка отменена. Доступ к PREMIUM+ прекращён.');
+                }).catch(() => {
+                    tg.showAlert('Ошибка отмены. Попробуйте ещё раз.');
+                });
             });
         }
 
