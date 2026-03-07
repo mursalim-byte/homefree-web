@@ -376,7 +376,7 @@
                 if (!confirmed) return;
                 fbDb.ref('users/' + androidId + '/premium_until').set(0).then(() => {
                     const box = document.getElementById('subStatusBox');
-                    box.innerHTML = '❌ Подписка отменена.';
+                    box.innerHTML = '❌ Подписка отменена.<br><br><span style="color:#888;font-size:13px">Регулярные платежи больше не будут списываться.</span>';
                     document.getElementById('cancelSubBtn').style.display = 'none';
                     tg.showAlert('Подписка отменена. Доступ к PREMIUM+ прекращён.');
                 }).catch(() => {
