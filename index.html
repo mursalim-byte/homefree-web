@@ -198,6 +198,18 @@
         let selectedPlan = { id: '1_month', price: 198, name: '1 месяц PREMIUM+' };
         let savedAndroidId = '';
 
+        function getTelegramUserId() {
+            if (tg.initDataUnsafe && tg.initDataUnsafe.user && tg.initDataUnsafe.user.id) {
+                return tg.initDataUnsafe.user.id;
+            }
+            try {
+                const params = new URLSearchParams(tg.initData);
+                const user = JSON.parse(decodeURIComponent(params.get('user') || '{}'));
+                if (user.id) return user.id;
+            } catch(e) {}
+            return null;
+        }
+
         // ========================================================
         // ШАГ 1: Выбор тарифа
         // ========================================================
@@ -259,8 +271,7 @@
             savedAndroidId = val;
             tg.HapticFeedback.impactOccurred('medium');
 
-            const userId = tg.initDataUnsafe && tg.initDataUnsafe.user
-                ? tg.initDataUnsafe.user.id : null;
+            const userId = getTelegramUserId();
 
             if (!userId) {
                 tg.showAlert('Ошибка: не удалось определить пользователя. Перезапустите бота командой /start.');
