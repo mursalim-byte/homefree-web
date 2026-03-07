@@ -25,7 +25,7 @@
         .tariff-price-row { display: flex; align-items: center; gap: 12px; font-size: 18px; }
         .radio-btn { width: 22px; height: 22px; border: 2px solid #555; border-radius: 50%; position: relative; flex-shrink: 0; }
         .selected .radio-btn { border-color: #e7d79b; }
-        .selected .radio-btn::after { content: ""; width: 10px; height: 10px; background: #e7d79b; border-radius: 50%; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+        .selected .radio-btn::after { content: ''; width: 10px; height: 10px; background: #e7d79b; border-radius: 50%; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
 
         .id-screen { width: 100%; }
         .id-instruction { background: #1c1c1c; border-radius: 14px; padding: 16px; margin-bottom: 20px; font-size: 13px; color: #ccc; line-height: 1.6; }
@@ -60,6 +60,7 @@
 </head>
 <body>
 
+    <!-- ШАГ 1: Выбор тарифа -->
     <div id="selection-page" class="page active">
         <div class="header">
             <h2>PREMIUM + 🚀</h2>
@@ -102,6 +103,7 @@
         <button class="continue-btn" onclick="goToIdPage()">Продолжить</button>
     </div>
 
+    <!-- ШАГ 2: Ввод ANDROID ID -->
     <div id="id-page" class="page">
         <div class="header">
             <h2>Введите ваш ID</h2>
@@ -144,6 +146,7 @@
         </div>
     </div>
 
+    <!-- ШАГ 3: Управление подпиской -->
     <div id="manage-page" class="page">
         <div class="header">
             <h2>Управление подпиской</h2>
@@ -159,6 +162,7 @@
     </div>
 
     <script>
+        // Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyATxflAcMLsr1bDHw_mUpDmYQXvNmediuE",
             authDomain: "homefree-vpn.firebaseapp.com",
@@ -177,6 +181,9 @@
         let selectedPlan = { id: '1_month', price: 198, name: '1 месяц PREMIUM+' };
         let savedAndroidId = '';
 
+        // ========================================================
+        // ШАГ 1: Выбор тарифа
+        // ========================================================
         function selectPlan(el, id, price, label) {
             document.querySelectorAll('.tariff-item').forEach(i => i.classList.remove('selected'));
             el.classList.add('selected');
@@ -190,6 +197,9 @@
             togglePage('id-page');
         }
 
+        // ========================================================
+        // ШАГ 2: Ввод ID
+        // ========================================================
         function onIdInput() {
             const input = document.getElementById('androidIdInput');
             const hint  = document.getElementById('idHint');
@@ -223,6 +233,11 @@
             document.getElementById('androidIdInput').focus();
         }
 
+        // ========================================================
+        // ШАГ 3: Оплата
+        // reply-кнопка → sendData (моментально)
+        // inline-кнопка → Firebase → бот присылает инвойс
+        // ========================================================
         async function sendToBot() {
             const val = document.getElementById('androidIdInput').value.trim().toUpperCase();
             if (val.length < 8) return;
@@ -236,23 +251,24 @@
                 android_id: savedAndroidId
             });
 
-            // Пробуем sendData (работает с reply-кнопкой)
-            try {
+            // Если есть query_id — открыто через reply-кнопку, sendData работает
+            if (tg.initDataUnsafe && tg.initDataUnsafe.query_id) {
                 tg.sendData(data);
                 return;
-            } catch(e) {
-                // sendData недоступен — открыто через inline кнопку
             }
 
-            // Fallback: пишем в Firebase, бот прочитает и отправит инвойс
-            const userId = tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : null;
+            // Fallback: открыто через inline-кнопку → пишем в Firebase
+            const userId = tg.initDataUnsafe && tg.initDataUnsafe.user
+                ? tg.initDataUnsafe.user.id
+                : null;
+
             if (!userId) {
-                tg.showAlert('Ошибка: не удалось определить пользователя. Используйте кнопку оплаты внизу чата.');
+                tg.showAlert('Ошибка: используйте кнопку оплаты внизу чата (не из меню).');
                 return;
             }
 
+            const btn = document.getElementById('idContinueBtn');
             try {
-                const btn = document.getElementById('idContinueBtn');
                 btn.disabled = true;
                 btn.textContent = 'Отправляем...';
 
@@ -269,12 +285,14 @@
                 tg.close();
             } catch(err) {
                 tg.showAlert('Ошибка отправки. Попробуйте ещё раз.');
-                const btn = document.getElementById('idContinueBtn');
                 btn.disabled = false;
                 btn.textContent = 'Оплатить';
             }
         }
 
+        // ========================================================
+        // Управление подпиской
+        // ========================================================
         function cancelSubscription() {
             tg.showConfirm("Вы уверены, что хотите отвязать карту и отменить подписку?", (confirmed) => {
                 if (confirmed) {
