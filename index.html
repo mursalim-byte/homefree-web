@@ -149,7 +149,30 @@
         <div class="header">
             <h2>Управление подпиской</h2>
         </div>
-        <div id="subStatusBox" class="sub-status-box">Загрузка...</div>
+
+        <div class="id-screen" style="width:100%">
+            <div class="id-instruction">
+                <b>Введите ваш ID из приложения:</b><br>
+                Откройте HomeFree VPN → меню ☰ → скопируйте ID
+            </div>
+            <div class="id-input-wrap">
+                <input
+                    id="manageIdInput"
+                    class="id-input"
+                    type="text"
+                    placeholder="Вставьте ваш ID"
+                    oninput="onManageIdInput()"
+                    autocomplete="off"
+                    autocorrect="off"
+                    spellcheck="false"
+                />
+                <span class="id-clear" id="manageClear" onclick="clearManageId()">✕</span>
+            </div>
+            <div class="id-hint" id="manageHint">ID можно скопировать из меню приложения</div>
+            <button class="continue-btn" id="manageCheckBtn" onclick="checkSubscription()" disabled>Проверить подписку</button>
+        </div>
+
+        <div id="subStatusBox" class="sub-status-box" style="display:none; margin-top:20px"></div>
         <div class="back-link" onclick="togglePage('selection-page')">← Вернуться к тарифам</div>
     </div>
 
@@ -280,15 +303,54 @@
         // ========================================================
         function openManagePage() {
             togglePage('manage-page');
-            const androidId = document.getElementById('androidIdInput').value.trim().toUpperCase();
-            const box = document.getElementById('subStatusBox');
-
-            if (!androidId || androidId.length < 8) {
-                box.innerHTML = '⚠️ Введите ваш ID на странице оплаты чтобы проверить статус подписки.';
-                return;
+            // Если ID уже введён на странице оплаты — подставляем автоматически
+            const existingId = document.getElementById('androidIdInput').value.trim().toUpperCase();
+            if (existingId && existingId.length >= 8) {
+                document.getElementById('manageIdInput').value = existingId;
+                onManageIdInput();
             }
+            document.getElementById('subStatusBox').style.display = 'none';
+        }
 
+        function onManageIdInput() {
+            const input = document.getElementById('manageIdInput');
+            const hint  = document.getElementById('manageHint');
+            const btn   = document.getElementById('manageCheckBtn');
+            const clear = document.getElementById('manageClear');
+            const val   = input.value.trim().toUpperCase();
+
+            clear.style.display = val.length > 0 ? 'block' : 'none';
+
+            if (val.length === 0) {
+                input.className = 'id-input';
+                hint.className  = 'id-hint';
+                hint.textContent = 'ID можно скопировать из меню приложения';
+                btn.disabled = true;
+            } else if (val.length < 8 || !val.match(/^[A-Z0-9]+$/)) {
+                input.className = 'id-input invalid';
+                hint.className  = 'id-hint error';
+                hint.textContent = 'ID должен содержать только буквы и цифры (от 8 символов)';
+                btn.disabled = true;
+            } else {
+                input.className = 'id-input valid';
+                hint.className  = 'id-hint success';
+                hint.textContent = '✓ ID выглядит корректно';
+                btn.disabled = false;
+            }
+        }
+
+        function clearManageId() {
+            document.getElementById('manageIdInput').value = '';
+            document.getElementById('subStatusBox').style.display = 'none';
+            onManageIdInput();
+        }
+
+        function checkSubscription() {
+            const androidId = document.getElementById('manageIdInput').value.trim().toUpperCase();
+            const box = document.getElementById('subStatusBox');
+            box.style.display = 'block';
             box.innerHTML = 'Загрузка...';
+
             fbDb.ref('users/' + androidId + '/premium_until').once('value').then(snap => {
                 const val = snap.val();
                 if (val && val > Date.now()) {
