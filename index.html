@@ -274,7 +274,7 @@
             const userId = getTelegramUserId();
 
             if (!userId) {
-                tg.showAlert('Ошибка: не удалось определить пользователя. Перезапустите бота командой /start.');
+                tg.showAlert('DEBUG:\ninitData: ' + (tg.initData || 'ПУСТО') + '\n\nunsafe user: ' + JSON.stringify(tg.initDataUnsafe));
                 return;
             }
 
