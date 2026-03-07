@@ -271,32 +271,14 @@
             savedAndroidId = val;
             tg.HapticFeedback.impactOccurred('medium');
 
-            const userId = getTelegramUserId();
+            const data = JSON.stringify({
+                id:         selectedPlan.id,
+                price:      selectedPlan.price,
+                name:       selectedPlan.name,
+                android_id: savedAndroidId
+            });
 
-            if (!userId) {
-                tg.showAlert('DEBUG:\ninitData: ' + (tg.initData || 'ПУСТО') + '\n\nunsafe user: ' + JSON.stringify(tg.initDataUnsafe));
-                return;
-            }
-
-            const btn = document.getElementById('idContinueBtn');
-            try {
-                btn.disabled = true;
-                btn.textContent = 'Отправляем...';
-                await fbDb.ref('payment_requests/' + userId).set({
-                    plan_id:    selectedPlan.id,
-                    price:      selectedPlan.price,
-                    name:       selectedPlan.name,
-                    android_id: savedAndroidId,
-                    status:     'pending',
-                    created_at: Date.now()
-                });
-                tg.showAlert('✅ Готово! Бот пришлёт счёт на оплату через несколько секунд.');
-                tg.close();
-            } catch(err) {
-                tg.showAlert('Ошибка отправки. Попробуйте ещё раз.');
-                btn.disabled = false;
-                btn.textContent = 'Оплатить';
-            }
+            tg.sendData(data);
         }
 
         // ========================================================
