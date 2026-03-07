@@ -259,23 +259,11 @@
             savedAndroidId = val;
             tg.HapticFeedback.impactOccurred('medium');
 
-            const data = JSON.stringify({
-                id:         selectedPlan.id,
-                price:      selectedPlan.price,
-                name:       selectedPlan.name,
-                android_id: savedAndroidId
-            });
-
-            if (tg.initDataUnsafe && tg.initDataUnsafe.query_id) {
-                tg.sendData(data);
-                return;
-            }
-
             const userId = tg.initDataUnsafe && tg.initDataUnsafe.user
                 ? tg.initDataUnsafe.user.id : null;
 
             if (!userId) {
-                tg.showAlert('Ошибка: используйте кнопку оплаты внизу чата.');
+                tg.showAlert('Ошибка: не удалось определить пользователя. Перезапустите бота командой /start.');
                 return;
             }
 
