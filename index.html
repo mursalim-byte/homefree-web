@@ -10,14 +10,11 @@
     <style>
         * { box-sizing: border-box; }
         body { background-color: #0b0b0b; color: #ffffff; font-family: -apple-system, sans-serif; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
-
         .page { display: none; width: 100%; flex-direction: column; align-items: center; }
         .page.active { display: flex; }
-
         .header { text-align: center; margin-bottom: 25px; }
         h2 { font-size: 22px; margin-bottom: 10px; font-weight: 500; }
         .description { color: #e7d79b; font-size: 14px; line-height: 1.4; text-align: center; margin-bottom: 20px; }
-
         .tariffs { width: 100%; display: flex; flex-direction: column; gap: 10px; }
         .tariff-item { background-color: #1c1c1c; border: 1px solid #333; border-radius: 14px; padding: 20px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: 0.2s; }
         .tariff-item.selected { border-color: #e7d79b; }
@@ -25,8 +22,7 @@
         .tariff-price-row { display: flex; align-items: center; gap: 12px; font-size: 18px; }
         .radio-btn { width: 22px; height: 22px; border: 2px solid #555; border-radius: 50%; position: relative; flex-shrink: 0; }
         .selected .radio-btn { border-color: #e7d79b; }
-        .selected .radio-btn::after { content: ''; width: 10px; height: 10px; background: #e7d79b; border-radius: 50%; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
-
+        .selected .radio-btn::after { content: ""; width: 10px; height: 10px; background: #e7d79b; border-radius: 50%; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
         .id-screen { width: 100%; }
         .id-instruction { background: #1c1c1c; border-radius: 14px; padding: 16px; margin-bottom: 20px; font-size: 13px; color: #ccc; line-height: 1.6; }
         .id-instruction b { color: #e7d79b; }
@@ -39,108 +35,93 @@
         .id-hint { font-size: 12px; color: #888; margin-bottom: 20px; min-height: 18px; }
         .id-hint.error { color: #ff4444; }
         .id-hint.success { color: #3DDC84; }
-
         .manage-sub { width: 100%; background: #1c1c1c; color: #888; border: none; padding: 14px; border-radius: 12px; margin: 15px 0; font-size: 15px; cursor: pointer; }
         .continue-btn { width: 100%; background: #fff; color: #000; border: none; padding: 18px; border-radius: 30px; font-weight: bold; font-size: 18px; cursor: pointer; margin-top: 20px; }
         .continue-btn:disabled { background: #444; color: #777; cursor: not-allowed; }
         .back-link { color: #e7d79b; margin-top: 20px; text-decoration: none; font-size: 14px; cursor: pointer; }
-
         .footer-text { font-size: 11px; color: #888; text-align: left; margin-top: 15px; line-height: 1.5; }
         .footer-text a { color: #e7d79b; text-decoration: underline; }
-
         .id-badge { background: #1c1c1c; border: 1px solid #333; border-radius: 10px; padding: 10px 14px; margin-bottom: 16px; width: 100%; display: flex; justify-content: space-between; align-items: center; }
         .id-badge-label { font-size: 11px; color: #888; }
         .id-badge-value { font-family: monospace; font-size: 13px; color: #3DDC84; }
         .id-badge-change { font-size: 11px; color: #e7d79b; cursor: pointer; }
-
         .sub-status-box { background: #1c1c1c; border-radius: 14px; padding: 24px; width: 100%; text-align: center; font-size: 15px; line-height: 1.8; }
         .cancel-btn { width: 100%; background: transparent; color: #ff4444; border: 1px solid #ff4444; padding: 16px; border-radius: 30px; font-weight: bold; font-size: 16px; cursor: pointer; margin-top: 16px; }
+        .lang-bar { width: 100%; display: flex; justify-content: flex-end; margin-bottom: 8px; }
+        .lang-btn { background: #1c1c1c; border: 1px solid #333; color: #e7d79b; border-radius: 8px; padding: 6px 12px; font-size: 13px; cursor: pointer; }
+        .lang-btn:hover { border-color: #e7d79b; }
     </style>
 </head>
 <body>
 
     <!-- ШАГ 1: Выбор тарифа -->
     <div id="selection-page" class="page active">
+        <div class="lang-bar">
+            <button class="lang-btn" onclick="toggleLang()" id="langToggleBtn">🇬🇧 English</button>
+        </div>
         <div class="header">
             <h2>PREMIUM + 🚀</h2>
-            <p class="description">Безлимитная скорость, все серверы, без рекламы</p>
+            <p class="description" id="selDesc">Безлимитная скорость, все серверы, без рекламы</p>
         </div>
-
         <div class="tariffs">
-            <div class="tariff-item selected" onclick="selectPlan(this, '1_month', 198, '1 месяц')">
-                <span class="tariff-name">1 месяц</span>
+            <div class="tariff-item selected" onclick="selectPlan(this, '1_month', 198, 0)">
+                <span class="tariff-name" id="plan1Name">1 месяц</span>
                 <div class="tariff-price-row">198 ₽ <div class="radio-btn"></div></div>
             </div>
-            <div class="tariff-item" onclick="selectPlan(this, '3_months', 445, '3 месяца')">
-                <span class="tariff-name">3 месяца</span>
+            <div class="tariff-item" onclick="selectPlan(this, '3_months', 445, 1)">
+                <span class="tariff-name" id="plan2Name">3 месяца</span>
                 <div class="tariff-price-row">445 ₽ <div class="radio-btn"></div></div>
             </div>
-            <div class="tariff-item" onclick="selectPlan(this, '6_months', 829, '6 месяцев')">
-                <span class="tariff-name">6 месяцев</span>
+            <div class="tariff-item" onclick="selectPlan(this, '6_months', 829, 2)">
+                <span class="tariff-name" id="plan3Name">6 месяцев</span>
                 <div class="tariff-price-row">829 ₽ <div class="radio-btn"></div></div>
             </div>
-            <div class="tariff-item" onclick="selectPlan(this, '12_months', 1429, '12 месяцев')">
-                <span class="tariff-name">12 месяцев</span>
+            <div class="tariff-item" onclick="selectPlan(this, '12_months', 1429, 3)">
+                <span class="tariff-name" id="plan4Name">12 месяцев</span>
                 <div class="tariff-price-row">1429 ₽ <div class="radio-btn"></div></div>
             </div>
         </div>
-
-        <button class="manage-sub" onclick="openManagePage()">Управление подпиской</button>
-
+        <button class="manage-sub" id="manageSubBtn" onclick="openManagePage()">Управление подпиской</button>
         <div class="footer-text">
             <div style="display: flex; gap: 10px;">
-                <div class="radio-btn" style="width: 14px; height: 14px; border-color: #e7d79b; flex-shrink: 0; background: #e7d79b; box-shadow: inset 0 0 0 3px #1c1c1c; margin-top: 2px;"></div>
-                <span>
+                <div class="radio-btn" style="width:14px;height:14px;border-color:#e7d79b;flex-shrink:0;background:#e7d79b;box-shadow:inset 0 0 0 3px #1c1c1c;margin-top:2px;"></div>
+                <span id="footerText">
                     Нажимая «Продолжить», вы соглашаетесь с
-                    <a href="https://sites.google.com/view/homefreevpn-usloviya-ispolzov/%D0%B3%D0%BB%D0%B0%D0%B2%D0%BD%D0%B0%D1%8F-%D1%81%D1%82%D1%80%D0%B0%D0%BD%D0%B8%D1%86%D0%B0" target="_blank">условиями использования</a>,
-                    <a href="https://sites.google.com/view/homefreevpn-privacy-policy/%D0%B3%D0%BB%D0%B0%D0%B2%D0%BD%D0%B0%D1%8F-%D1%81%D1%82%D1%80%D0%B0%D0%BD%D0%B8%D1%86%D0%B0" target="_blank">политикой конфиденциальности</a>
-                    и <a href="https://sites.google.com/view/homefree-vpn-podpiska/%D0%B3%D0%BB%D0%B0%D0%B2%D0%BD%D0%B0%D1%8F-%D1%81%D1%82%D1%80%D0%B0%D0%BD%D0%B8%D1%86%D0%B0" target="_blank">условиями платной подписки</a>.
+                    <a href="https://sites.google.com/view/homefreevpn-usloviya-ispolzov/%D0%B3%D0%BB%D0%B0%D0%B2%D0%BD%D0%B0%D1%8F-%D1%81%D1%82%D1%80%D0%B0%D0%BD%D0%B8%D1%86%D0%B0" target="_blank" id="termsLink">условиями использования</a>,
+                    <a href="https://sites.google.com/view/homefreevpn-privacy-policy/%D0%B3%D0%BB%D0%B0%D0%B2%D0%BD%D0%B0%D1%8F-%D1%81%D1%82%D1%80%D0%B0%D0%BD%D0%B8%D1%86%D0%B0" target="_blank" id="privacyLink">политикой конфиденциальности</a>
+                    и <a href="https://sites.google.com/view/homefree-vpn-podpiska/%D0%B3%D0%BB%D0%B0%D0%B2%D0%BD%D0%B0%D1%8F-%D1%81%D1%82%D1%80%D0%B0%D0%BD%D0%B8%D1%86%D0%B0" target="_blank" id="subTermsLink">условиями платной подписки</a>.
                 </span>
             </div>
         </div>
-
-        <button class="continue-btn" onclick="goToIdPage()">Продолжить</button>
+        <button class="continue-btn" id="continueBtnSel" onclick="goToIdPage()">Продолжить</button>
     </div>
 
     <!-- ШАГ 2: Ввод ANDROID ID -->
     <div id="id-page" class="page">
         <div class="header">
-            <h2>Введите ваш ID</h2>
-            <p class="description">Нужен для активации подписки на вашем устройстве</p>
+            <h2 id="idPageTitle">Введите ваш ID</h2>
+            <p class="description" id="idPageDesc">Нужен для активации подписки на вашем устройстве</p>
         </div>
-
-        <div class="id-badge" style="margin-bottom: 20px;">
+        <div class="id-badge" style="margin-bottom:20px;">
             <div>
-                <div class="id-badge-label">Выбранный тариф</div>
-                <div class="id-badge-value" id="selectedPlanBadge" style="color: #e7d79b;">1 месяц — 198 ₽</div>
+                <div class="id-badge-label" id="selectedPlanLabel">Выбранный тариф</div>
+                <div class="id-badge-value" id="selectedPlanBadge" style="color:#e7d79b;">1 месяц — 198 ₽</div>
             </div>
-            <div class="id-badge-change" onclick="togglePage('selection-page')">Изменить</div>
+            <div class="id-badge-change" onclick="togglePage('selection-page')" id="changeBtn">Изменить</div>
         </div>
-
         <div class="id-screen">
-            <div class="id-instruction">
-                <b>Как найти ваш ID:</b><br>
-                1. Откройте приложение <b>HomeFree VPN</b><br>
-                2. Нажмите кнопку меню ☰ в левом верхнем углу<br>
-                3. Скопируйте ваш ID (значок копирования рядом с ID)<br>
-                4. Вставьте его в поле ниже
+            <div class="id-instruction" id="idInstruction">
+                <b id="howToFind">Как найти ваш ID:</b><br>
+                <span id="idStep1">1. Откройте приложение <b>HomeFree VPN</b></span><br>
+                <span id="idStep2">2. Нажмите кнопку меню ☰ в левом верхнем углу</span><br>
+                <span id="idStep3">3. Скопируйте ваш ID (значок копирования рядом с ID)</span><br>
+                <span id="idStep4">4. Вставьте его в поле ниже</span>
             </div>
-
             <div class="id-input-wrap">
-                <input
-                    id="androidIdInput"
-                    class="id-input"
-                    type="text"
-                    placeholder="Вставьте ваш ID"
-                    oninput="onIdInput()"
-                    autocomplete="off"
-                    autocorrect="off"
-                    spellcheck="false"
-                />
+                <input id="androidIdInput" class="id-input" type="text" placeholder="Вставьте ваш ID" oninput="onIdInput()" autocomplete="off" autocorrect="off" spellcheck="false"/>
                 <span class="id-clear" id="idClear" onclick="clearId()">✕</span>
             </div>
             <div class="id-hint" id="idHint">ID можно скопировать из меню приложения</div>
-
             <button class="continue-btn" id="idContinueBtn" onclick="sendToBot()" disabled>Оплатить</button>
         </div>
     </div>
@@ -148,229 +129,391 @@
     <!-- ШАГ 3: Управление подпиской -->
     <div id="manage-page" class="page">
         <div class="header">
-            <h2>Управление подпиской</h2>
+            <h2 id="manageTitle">Управление подпиской</h2>
         </div>
-
         <div class="id-screen" style="width:100%">
-            <div class="id-instruction">
+            <div class="id-instruction" id="manageInstruction">
                 <b>Введите ваш ID из приложения:</b><br>
                 Откройте HomeFree VPN → меню ☰ → скопируйте ID
             </div>
             <div class="id-input-wrap">
-                <input
-                    id="manageIdInput"
-                    class="id-input"
-                    type="text"
-                    placeholder="Вставьте ваш ID"
-                    oninput="onManageIdInput()"
-                    autocomplete="off"
-                    autocorrect="off"
-                    spellcheck="false"
-                />
+                <input id="manageIdInput" class="id-input" type="text" placeholder="Вставьте ваш ID" oninput="onManageIdInput()" autocomplete="off" autocorrect="off" spellcheck="false"/>
                 <span class="id-clear" id="manageClear" onclick="clearManageId()">✕</span>
             </div>
             <div class="id-hint" id="manageHint">ID можно скопировать из меню приложения</div>
             <button class="continue-btn" id="manageCheckBtn" onclick="checkSubscription()" disabled>Проверить подписку</button>
         </div>
-
-        <div id="subStatusBox" class="sub-status-box" style="display:none; margin-top:20px"></div>
+        <div id="subStatusBox" class="sub-status-box" style="display:none;margin-top:20px"></div>
         <button id="cancelSubBtn" class="cancel-btn" style="display:none" onclick="cancelSubscription()">Отменить подписку</button>
-        <div class="back-link" onclick="togglePage('selection-page')">← Вернуться к тарифам</div>
+        <div class="back-link" onclick="togglePage('selection-page')" id="backLink">← Вернуться к тарифам</div>
     </div>
 
     <script>
+        // ════════════════════════════════════════════════════
         // Firebase
+        // ════════════════════════════════════════════════════
         const firebaseConfig = {
-            apiKey: "AIzaSyATxflAcMLsr1bDHw_mUpDmYQXvNmediuE",
-            authDomain: "homefree-vpn.firebaseapp.com",
-            databaseURL: "https://homefree-vpn-default-rtdb.firebaseio.com",
-            projectId: "homefree-vpn",
-            storageBucket: "homefree-vpn.appspot.com",
+            apiKey:            "AIzaSyATxflAcMLsr1bDHw_mUpDmYQXvNmediuE",
+            authDomain:        "homefree-vpn.firebaseapp.com",
+            databaseURL:       "https://homefree-vpn-default-rtdb.firebaseio.com",
+            projectId:         "homefree-vpn",
+            storageBucket:     "homefree-vpn.appspot.com",
             messagingSenderId: "1035218858726",
-            appId: "1:1035218858726:web:placeholder"
+            appId:             "1:1035218858726:web:placeholder"
         };
         firebase.initializeApp(firebaseConfig);
         const fbDb = firebase.database();
 
-        let tg = window.Telegram.WebApp;
+        const tg = window.Telegram.WebApp;
         tg.expand();
 
-        let selectedPlan = { id: '1_month', price: 198, name: '1 месяц PREMIUM+' };
-        let savedAndroidId = '';
-
-        function getTelegramUserId() {
-            if (tg.initDataUnsafe && tg.initDataUnsafe.user && tg.initDataUnsafe.user.id) {
-                return tg.initDataUnsafe.user.id;
+        // ════════════════════════════════════════════════════
+        // ПЕРЕВОДЫ
+        // ════════════════════════════════════════════════════
+        const i18n = {
+            ru: {
+                langToggle:        "🇬🇧 English",
+                selDesc:           "Безлимитная скорость, все серверы, без рекламы",
+                plans:             ["1 месяц", "3 месяца", "6 месяцев", "12 месяцев"],
+                planNames:         ["1 месяц PREMIUM+", "3 месяца PREMIUM+", "6 месяцев PREMIUM+", "12 месяцев PREMIUM+"],
+                manageSub:         "Управление подпиской",
+                continueBtn:       "Продолжить",
+                footerText:        "Нажимая «Продолжить», вы соглашаетесь с",
+                termsLink:         "условиями использования",
+                privacyLink:       "политикой конфиденциальности",
+                subTermsLink:      "условиями платной подписки",
+                idPageTitle:       "Введите ваш ID",
+                idPageDesc:        "Нужен для активации подписки на вашем устройстве",
+                selectedPlanLabel: "Выбранный тариф",
+                changeBtn:         "Изменить",
+                howToFind:         "Как найти ваш ID:",
+                idStep1:           "1. Откройте приложение <b>HomeFree VPN</b>",
+                idStep2:           "2. Нажмите кнопку меню ☰ в левом верхнем углу",
+                idStep3:           "3. Скопируйте ваш ID (значок копирования рядом с ID)",
+                idStep4:           "4. Вставьте его в поле ниже",
+                idPlaceholder:     "Вставьте ваш ID",
+                idHintDefault:     "ID можно скопировать из меню приложения",
+                idHintError:       "ID должен содержать только буквы и цифры (от 8 символов)",
+                idHintOk:          "✓ ID выглядит корректно",
+                payBtn:            "Оплатить",
+                manageTitle:       "Управление подпиской",
+                manageInstruction: "<b>Введите ваш ID из приложения:</b><br>Откройте HomeFree VPN → меню ☰ → скопируйте ID",
+                manageHintDefault: "ID можно скопировать из меню приложения",
+                manageHintError:   "ID должен содержать только буквы и цифры (от 8 символов)",
+                manageHintOk:      "✓ ID выглядит корректно",
+                checkBtn:          "Проверить подписку",
+                backLink:          "← Вернуться к тарифам",
+                loading:           "Загрузка...",
+                subActive:         "✅ Подписка PREMIUM+ активна<br><br>Действует до:<br>",
+                subNotFound:       "❌ Активная подписка не найдена.<br><br>Нажмите «Назад» и оформите подписку.",
+                subError:          "⚠️ Не удалось загрузить данные. Проверьте подключение.",
+                cancelSub:         "Отменить подписку",
+                cancelConfirm:     "Вы уверены, что хотите отменить подписку PREMIUM+?\n\nДоступ будет прекращён немедленно.",
+                cancelDone:        "❌ Подписка отменена.<br><br><span style=\"color:#888;font-size:13px\">Регулярные платежи больше не будут списываться.</span>",
+                cancelAlert:       "Подписка отменена. Доступ к PREMIUM+ прекращён.",
+                cancelError:       "Ошибка отмены. Попробуйте ещё раз.",
+                dateLocale:        "ru-RU",
+            },
+            en: {
+                langToggle:        "🇷🇺 Русский",
+                selDesc:           "Unlimited speed, all servers, no ads",
+                plans:             ["1 month", "3 months", "6 months", "12 months"],
+                planNames:         ["1 month PREMIUM+", "3 months PREMIUM+", "6 months PREMIUM+", "12 months PREMIUM+"],
+                manageSub:         "Manage subscription",
+                continueBtn:       "Continue",
+                footerText:        "By pressing «Continue», you agree to the",
+                termsLink:         "terms of use",
+                privacyLink:       "privacy policy",
+                subTermsLink:      "subscription terms",
+                idPageTitle:       "Enter your ID",
+                idPageDesc:        "Required to activate subscription on your device",
+                selectedPlanLabel: "Selected plan",
+                changeBtn:         "Change",
+                howToFind:         "How to find your ID:",
+                idStep1:           "1. Open the <b>HomeFree VPN</b> app",
+                idStep2:           "2. Tap the menu ☰ button in the top left corner",
+                idStep3:           "3. Copy your ID (copy icon next to ID)",
+                idStep4:           "4. Paste it in the field below",
+                idPlaceholder:     "Paste your ID",
+                idHintDefault:     "ID can be copied from the app menu",
+                idHintError:       "ID must contain only letters and numbers (at least 8 characters)",
+                idHintOk:          "✓ ID looks correct",
+                payBtn:            "Pay",
+                manageTitle:       "Manage subscription",
+                manageInstruction: "<b>Enter your ID from the app:</b><br>Open HomeFree VPN → menu ☰ → copy ID",
+                manageHintDefault: "ID can be copied from the app menu",
+                manageHintError:   "ID must contain only letters and numbers (at least 8 characters)",
+                manageHintOk:      "✓ ID looks correct",
+                checkBtn:          "Check subscription",
+                backLink:          "← Back to plans",
+                loading:           "Loading...",
+                subActive:         "✅ PREMIUM+ subscription is active<br><br>Valid until:<br>",
+                subNotFound:       "❌ No active subscription found.<br><br>Press «Back» and subscribe.",
+                subError:          "⚠️ Failed to load data. Check your connection.",
+                cancelSub:         "Cancel subscription",
+                cancelConfirm:     "Are you sure you want to cancel PREMIUM+ subscription?\n\nAccess will be terminated immediately.",
+                cancelDone:        "❌ Subscription cancelled.<br><br><span style=\"color:#888;font-size:13px\">No more charges will be made.</span>",
+                cancelAlert:       "Subscription cancelled. PREMIUM+ access terminated.",
+                cancelError:       "Cancellation error. Please try again.",
+                dateLocale:        "en-GB",
             }
+        };
+
+        // ════════════════════════════════════════════════════
+        // Определение языка
+        // 1. URL параметр ?lang=en (передаётся ботом)
+        // 2. Язык Telegram пользователя
+        // 3. Fallback: ru
+        // ════════════════════════════════════════════════════
+        function detectLang() {
+            const urlLang = new URLSearchParams(window.location.search).get("lang");
+            if (urlLang === "en") return "en";
+            if (urlLang === "ru") return "ru";
             try {
-                const params = new URLSearchParams(tg.initData);
-                const user = JSON.parse(decodeURIComponent(params.get('user') || '{}'));
-                if (user.id) return user.id;
+                const tgLang = tg.initDataUnsafe?.user?.language_code || "";
+                if (tgLang.startsWith("en")) return "en";
             } catch(e) {}
-            return null;
+            return "ru";
         }
 
-        // ========================================================
-        // ШАГ 1: Выбор тарифа
-        // ========================================================
-        function selectPlan(el, id, price, label) {
-            document.querySelectorAll('.tariff-item').forEach(i => i.classList.remove('selected'));
-            el.classList.add('selected');
-            selectedPlan = { id: id, price: price, name: label + ' PREMIUM+' };
+        let currentLang = detectLang();
+
+        // ════════════════════════════════════════════════════
+        // Применение переводов
+        // ════════════════════════════════════════════════════
+        function applyTranslations(lang) {
+            const t = i18n[lang];
+
+            // Кнопка смены языка
+            document.getElementById("langToggleBtn").textContent = t.langToggle;
+
+            // Страница выбора тарифа
+            document.getElementById("selDesc").textContent        = t.selDesc;
+            document.getElementById("plan1Name").textContent      = t.plans[0];
+            document.getElementById("plan2Name").textContent      = t.plans[1];
+            document.getElementById("plan3Name").textContent      = t.plans[2];
+            document.getElementById("plan4Name").textContent      = t.plans[3];
+            document.getElementById("manageSubBtn").textContent   = t.manageSub;
+            document.getElementById("continueBtnSel").textContent = t.continueBtn;
+            document.getElementById("termsLink").textContent      = t.termsLink;
+            document.getElementById("privacyLink").textContent    = t.privacyLink;
+            document.getElementById("subTermsLink").textContent   = t.subTermsLink;
+
+            // Страница ввода ID
+            document.getElementById("idPageTitle").textContent       = t.idPageTitle;
+            document.getElementById("idPageDesc").textContent        = t.idPageDesc;
+            document.getElementById("selectedPlanLabel").textContent = t.selectedPlanLabel;
+            document.getElementById("changeBtn").textContent         = t.changeBtn;
+            document.getElementById("howToFind").textContent         = t.howToFind;
+            document.getElementById("idStep1").innerHTML             = t.idStep1;
+            document.getElementById("idStep2").textContent           = t.idStep2;
+            document.getElementById("idStep3").textContent           = t.idStep3;
+            document.getElementById("idStep4").textContent           = t.idStep4;
+            document.getElementById("androidIdInput").placeholder    = t.idPlaceholder;
+            document.getElementById("idHint").textContent            = t.idHintDefault;
+            document.getElementById("idContinueBtn").textContent     = t.payBtn;
+
+            // Обновляем бейдж тарифа
+            updatePlanBadge();
+
+            // Страница управления подпиской
+            document.getElementById("manageTitle").textContent       = t.manageTitle;
+            document.getElementById("manageInstruction").innerHTML   = t.manageInstruction;
+            document.getElementById("manageHint").textContent        = t.manageHintDefault;
+            document.getElementById("manageCheckBtn").textContent    = t.checkBtn;
+            document.getElementById("backLink").textContent          = t.backLink;
+            document.getElementById("cancelSubBtn").textContent      = t.cancelSub;
+            document.getElementById("manageIdInput").placeholder     = t.idPlaceholder;
+        }
+
+        function toggleLang() {
+            currentLang = currentLang === "ru" ? "en" : "ru";
+            applyTranslations(currentLang);
             tg.HapticFeedback.selectionChanged();
         }
 
-        function goToIdPage() {
-            document.getElementById('selectedPlanBadge').textContent =
-                selectedPlan.name.replace(' PREMIUM+', '') + ' — ' + selectedPlan.price + ' ₽';
-            togglePage('id-page');
+        // ════════════════════════════════════════════════════
+        // Выбор тарифа
+        // ════════════════════════════════════════════════════
+        const PLAN_IDS     = ["1_month", "3_months", "6_months", "12_months"];
+        const PLAN_PRICES  = [198, 445, 829, 1429];
+
+        let selectedPlan = { id: "1_month", price: 198, nameIdx: 0 };
+
+        function selectPlan(el, id, price, idx) {
+            document.querySelectorAll(".tariff-item").forEach(i => i.classList.remove("selected"));
+            el.classList.add("selected");
+            selectedPlan = { id: id, price: price, nameIdx: idx };
+            updatePlanBadge();
+            tg.HapticFeedback.selectionChanged();
         }
 
-        // ========================================================
-        // ШАГ 2: Ввод ID
-        // ========================================================
-        function onIdInput() {
-            const input = document.getElementById('androidIdInput');
-            const hint  = document.getElementById('idHint');
-            const btn   = document.getElementById('idContinueBtn');
-            const clear = document.getElementById('idClear');
-            const val   = input.value.trim().toUpperCase();
+        function updatePlanBadge() {
+            const t    = i18n[currentLang];
+            const name = t.plans[selectedPlan.nameIdx];
+            document.getElementById("selectedPlanBadge").textContent = name + " — " + selectedPlan.price + " ₽";
+        }
 
-            clear.style.display = val.length > 0 ? 'block' : 'none';
+        function goToIdPage() {
+            updatePlanBadge();
+            togglePage("id-page");
+        }
+
+        // ════════════════════════════════════════════════════
+        // Валидация ID
+        // ════════════════════════════════════════════════════
+        function validateId(val) {
+            return val.length >= 8 && /^[A-Z0-9]+$/.test(val);
+        }
+
+        function onIdInput() {
+            const input = document.getElementById("androidIdInput");
+            const hint  = document.getElementById("idHint");
+            const btn   = document.getElementById("idContinueBtn");
+            const clear = document.getElementById("idClear");
+            const val   = input.value.trim().toUpperCase();
+            const t     = i18n[currentLang];
+
+            clear.style.display = val.length > 0 ? "block" : "none";
 
             if (val.length === 0) {
-                input.className = 'id-input';
-                hint.className  = 'id-hint';
-                hint.textContent = 'ID можно скопировать из меню приложения';
-                btn.disabled = true;
-            } else if (val.length < 8 || !val.match(/^[A-Z0-9]+$/)) {
-                input.className = 'id-input invalid';
-                hint.className  = 'id-hint error';
-                hint.textContent = 'ID должен содержать только буквы и цифры (от 8 символов)';
-                btn.disabled = true;
+                input.className      = "id-input";
+                hint.className       = "id-hint";
+                hint.textContent     = t.idHintDefault;
+                btn.disabled         = true;
+            } else if (!validateId(val)) {
+                input.className  = "id-input invalid";
+                hint.className   = "id-hint error";
+                hint.textContent = t.idHintError;
+                btn.disabled     = true;
             } else {
-                input.className = 'id-input valid';
-                hint.className  = 'id-hint success';
-                hint.textContent = '✓ ID выглядит корректно';
-                btn.disabled = false;
+                input.className  = "id-input valid";
+                hint.className   = "id-hint success";
+                hint.textContent = t.idHintOk;
+                btn.disabled     = false;
             }
         }
 
         function clearId() {
-            document.getElementById('androidIdInput').value = '';
+            document.getElementById("androidIdInput").value = "";
             onIdInput();
-            document.getElementById('androidIdInput').focus();
+            document.getElementById("androidIdInput").focus();
         }
 
-        // ========================================================
-        // ШАГ 3: Оплата
-        // ========================================================
+        // ════════════════════════════════════════════════════
+        // Отправка данных в бот
+        // ════════════════════════════════════════════════════
         async function sendToBot() {
-            const val = document.getElementById('androidIdInput').value.trim().toUpperCase();
-            if (val.length < 8) return;
-            savedAndroidId = val;
-            tg.HapticFeedback.impactOccurred('medium');
-
+            const val = document.getElementById("androidIdInput").value.trim().toUpperCase();
+            if (!validateId(val)) return;
+            tg.HapticFeedback.impactOccurred("medium");
+            const t    = i18n[currentLang];
             const data = JSON.stringify({
                 id:         selectedPlan.id,
                 price:      selectedPlan.price,
-                name:       selectedPlan.name,
-                android_id: savedAndroidId
+                name:       t.planNames[selectedPlan.nameIdx],
+                android_id: val,
+                lang:       currentLang
             });
-
             tg.sendData(data);
         }
 
-        // ========================================================
-        // Управление подпиской — загружаем статус из Firebase
-        // ========================================================
+        // ════════════════════════════════════════════════════
+        // Управление подпиской
+        // ════════════════════════════════════════════════════
         function openManagePage() {
-            togglePage('manage-page');
-            // Если ID уже введён на странице оплаты — подставляем автоматически
-            const existingId = document.getElementById('androidIdInput').value.trim().toUpperCase();
+            togglePage("manage-page");
+            const existingId = document.getElementById("androidIdInput").value.trim().toUpperCase();
             if (existingId && existingId.length >= 8) {
-                document.getElementById('manageIdInput').value = existingId;
+                document.getElementById("manageIdInput").value = existingId;
                 onManageIdInput();
             }
-            document.getElementById('subStatusBox').style.display = 'none';
+            document.getElementById("subStatusBox").style.display = "none";
         }
 
         function onManageIdInput() {
-            const input = document.getElementById('manageIdInput');
-            const hint  = document.getElementById('manageHint');
-            const btn   = document.getElementById('manageCheckBtn');
-            const clear = document.getElementById('manageClear');
+            const input = document.getElementById("manageIdInput");
+            const hint  = document.getElementById("manageHint");
+            const btn   = document.getElementById("manageCheckBtn");
+            const clear = document.getElementById("manageClear");
             const val   = input.value.trim().toUpperCase();
+            const t     = i18n[currentLang];
 
-            clear.style.display = val.length > 0 ? 'block' : 'none';
+            clear.style.display = val.length > 0 ? "block" : "none";
 
             if (val.length === 0) {
-                input.className = 'id-input';
-                hint.className  = 'id-hint';
-                hint.textContent = 'ID можно скопировать из меню приложения';
-                btn.disabled = true;
-            } else if (val.length < 8 || !val.match(/^[A-Z0-9]+$/)) {
-                input.className = 'id-input invalid';
-                hint.className  = 'id-hint error';
-                hint.textContent = 'ID должен содержать только буквы и цифры (от 8 символов)';
-                btn.disabled = true;
+                input.className  = "id-input";
+                hint.className   = "id-hint";
+                hint.textContent = t.manageHintDefault;
+                btn.disabled     = true;
+            } else if (!validateId(val)) {
+                input.className  = "id-input invalid";
+                hint.className   = "id-hint error";
+                hint.textContent = t.manageHintError;
+                btn.disabled     = true;
             } else {
-                input.className = 'id-input valid';
-                hint.className  = 'id-hint success';
-                hint.textContent = '✓ ID выглядит корректно';
-                btn.disabled = false;
+                input.className  = "id-input valid";
+                hint.className   = "id-hint success";
+                hint.textContent = t.manageHintOk;
+                btn.disabled     = false;
             }
         }
 
         function clearManageId() {
-            document.getElementById('manageIdInput').value = '';
-            document.getElementById('subStatusBox').style.display = 'none';
+            document.getElementById("manageIdInput").value = "";
+            document.getElementById("subStatusBox").style.display = "none";
             onManageIdInput();
         }
 
         function checkSubscription() {
-            const androidId = document.getElementById('manageIdInput').value.trim().toUpperCase();
-            const box = document.getElementById('subStatusBox');
-            const cancelBtn = document.getElementById('cancelSubBtn');
-            box.style.display = 'block';
-            cancelBtn.style.display = 'none';
-            box.innerHTML = 'Загрузка...';
+            const androidId = document.getElementById("manageIdInput").value.trim().toUpperCase();
+            const box       = document.getElementById("subStatusBox");
+            const cancelBtn = document.getElementById("cancelSubBtn");
+            const t         = i18n[currentLang];
+            box.style.display    = "block";
+            cancelBtn.style.display = "none";
+            box.innerHTML        = t.loading;
 
-            fbDb.ref('users/' + androidId + '/premium_until').once('value').then(snap => {
+            fbDb.ref("users/" + androidId + "/premium_until").once("value").then(snap => {
                 const val = snap.val();
                 if (val && val > Date.now()) {
-                    const date = new Date(val).toLocaleDateString('ru-RU', {day: '2-digit', month: '2-digit', year: 'numeric'});
-                    box.innerHTML = '✅ Подписка PREMIUM+ активна<br><br>Действует до:<br><b style="color:#3DDC84; font-size:20px">' + date + '</b>';
-                    cancelBtn.style.display = 'block';
+                    const date = new Date(val).toLocaleDateString(t.dateLocale, {day:"2-digit",month:"2-digit",year:"numeric"});
+                    box.innerHTML = t.subActive + "<b style=\"color:#3DDC84;font-size:20px\">" + date + "</b>";
+                    cancelBtn.style.display = "block";
                 } else {
-                    box.innerHTML = '❌ Активная подписка не найдена.<br><br>Нажмите «Назад» и оформите подписку.';
-                    cancelBtn.style.display = 'none';
+                    box.innerHTML = t.subNotFound;
                 }
             }).catch(() => {
-                box.innerHTML = '⚠️ Не удалось загрузить данные. Проверьте подключение.';
+                box.innerHTML = t.subError;
             });
         }
 
         function cancelSubscription() {
-            const androidId = document.getElementById('manageIdInput').value.trim().toUpperCase();
-            tg.showConfirm('Вы уверены, что хотите отменить подписку PREMIUM+?\n\nДоступ будет прекращён немедленно.', (confirmed) => {
+            const androidId = document.getElementById("manageIdInput").value.trim().toUpperCase();
+            const t         = i18n[currentLang];
+            tg.showConfirm(t.cancelConfirm, (confirmed) => {
                 if (!confirmed) return;
-                fbDb.ref('users/' + androidId + '/premium_until').set(0).then(() => {
-                    const box = document.getElementById('subStatusBox');
-                    box.innerHTML = '❌ Подписка отменена.<br><br><span style="color:#888;font-size:13px">Регулярные платежи больше не будут списываться.</span>';
-                    document.getElementById('cancelSubBtn').style.display = 'none';
-                    tg.showAlert('Подписка отменена. Доступ к PREMIUM+ прекращён.');
+                fbDb.ref("users/" + androidId + "/premium_until").set(0).then(() => {
+                    const box = document.getElementById("subStatusBox");
+                    box.innerHTML = t.cancelDone;
+                    document.getElementById("cancelSubBtn").style.display = "none";
+                    tg.showAlert(t.cancelAlert);
                 }).catch(() => {
-                    tg.showAlert('Ошибка отмены. Попробуйте ещё раз.');
+                    tg.showAlert(t.cancelError);
                 });
             });
         }
 
         function togglePage(pageId) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.getElementById(pageId).classList.add('active');
-            tg.HapticFeedback.impactOccurred('light');
+            document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+            document.getElementById(pageId).classList.add("active");
+            tg.HapticFeedback.impactOccurred("light");
         }
+
+        // ════════════════════════════════════════════════════
+        // Инициализация
+        // ════════════════════════════════════════════════════
+        applyTranslations(currentLang);
     </script>
 </body>
 </html>
